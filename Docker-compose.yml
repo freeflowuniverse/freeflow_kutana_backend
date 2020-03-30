@@ -5,4 +5,8 @@ services:
     ports:
       - "5000:5000"
   redis:
-    image: "redis:alpine"
+    image: "3bot_app_jimber/ffc_janus:staging"
+    container_name: ffc_backend
+    restart: always
+    networks:
+      - ffc
