@@ -16,7 +16,7 @@ staging_deploy:
         - echo "Building and deploying ffc_janus staging."
         - docker rm -f ffc_backend || true
         - docker build -t 3bot_app_jimber/ffc_backend:staging .
-        - docker run -d -it --name=ffc_backend --network=ffc 3bot_app_jimber/ffc_backend:staging
+        - docker run -d -it --name=ffc_backend --network=ffc_backend 3bot_app_jimber/ffc_backend:staging
     
 deploy:
     stage: deploy
@@ -28,5 +28,5 @@ deploy:
         - echo "Building and deploying ffc_janus production."
         - docker rm -f ffc_janus || true
         - docker build -t 3bot_app_jimber/ffc_backend:$CI_COMMIT_TAG .
-        - docker run -d -it --name=ffc_backend --network=ffc 3bot_app_jimber/ffc_backend:$CI_COMMIT_TAG
+        - docker run -d -it --name=ffc_backend --network=ffc_backend 3bot_app_jimber/ffc_backend:$CI_COMMIT_TAG
     
