@@ -5,11 +5,11 @@ services:
     ports:
       - "5000:5000"
   redis:
-    image: "3bot_app_jimber/ffc_janus:staging"
+    image: "3bot_app_jimber/freeflowconnect-backend:staging"
     container_name: ffc_backend
     restart: always
     networks:
-      - ffc
+      - ffc_backend
 
 networks:
-  ffc:
+  ffc_backend:
