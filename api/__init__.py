@@ -5,61 +5,80 @@ import json
 api = Blueprint('api', __name__, url_prefix='/api')
 
 
-@api.route('/rooms', methods=['GET'])
+@api.route('/teams', methods=['GET'])
 def list_of_rooms():
     return jsonify([{'room': 'test'}])
 
 
-@api.route('/rooms/create', methods=['POST'])
-def create_room():
-    room_data = request.get_json()
-    room_name = room_data['name']
-    room_data['members'] = []
-    room_data['messages'] = []
-    room_info = get_room_info(room_name)
-    if room_info is not None:
-        return jsonify({'error': '{} room already exists'.format(room_name)})
-    g.redis.set(room_name, json.dumps(room_data))
-    return room_data
+@api.route('/teams/<team_name>/', methods=['GET'])
+def get_room_info(team_name):
+    team_info = g.redis.get(team_name)
+    if team_info is None:
+        return jsonify({'error': 'No team found for {}'.format(team_name)})
+    return jsonify(json.loads(team_info))
 
 
-@api.route('/rooms/<room_name>/join', methods=['POST'])
-def join_room(room_name):
-    request_data = request.get_json() #todo with user tokens
-    room_info = get_room_info(room_name)
-    member = {"name": request_data['name']}
-    room_info["members"].append(member)
-    g.redis.set(room_name, json.dumps(room_info))
-    return jsonify(room_info)
+@api.route('/teams/<team_name>/members', methods=['GET'])
+def get_team_members(team_name):
+    team_info = get_team_data(team_name)
+    if team_info is None:
+        return jsonify({'error': 'No team found for {}'.format(team_name)})
+    return jsonify(team_info['members'])
 
 
-@api.route('/rooms/<room_name>/', methods=['GET'])
-def get_room_info(room_name):
-    room_info = g.redis.get(room_name)
-    if room_info is None:
-        return jsonify({'error': 'No room found for {}'.format(room_name)})
-    return jsonify(json.loads(room_info))
+@api.route('/teams/<team_name>/members/admins', methods=['GET'])
+def get_team_admin(team_name):
+    team_info = get_team_data(team_name)
+    if team_info is None:
+        return jsonify({'error': 'No team found for {}'.format(team_name)})
+    privileged_members = []
+    for member in team_info['members']:
+        member_role = member["role"]
+        if member_role == "owner" or member_role == "admin":
+            privileged_members.append(member)
+    return jsonify(privileged_members)
 
 
-@api.route('/rooms/<room_name>/members', methods=['GET'])
-def get_room_members(room_name):
-    room_info = get_room_info(room_name)
-    return jsonify(room_info['members'])
+@api.route('/teams/<team_name>/history', methods=['GET'])
+def get_room_chat_history(team_name):
+    team_info = get_team_data(team_name)
+    if team_info is None:
+        return jsonify({'error': 'No team found for {}'.format(team_name)})
+    return jsonify(team_info['messages'])
 
 
-@api.route('/rooms/<room_name>/history', methods=['GET'])
-def get_room_chat_history(room_name):
-    room_info = get_room_info(room_name)
-    return jsonify(room_info['messages'])
+def get_team_data(team_name):
+    team_info = g.redis.get(team_name)
+    if team_info is None:
+        return None
+    return json.loads(team_info)
 
 
-def get_room_info(room_name):
-    room_info = g.redis.get(room_name)
-    return json.loads(room_info)
+def add_message(team_name, message):
+    team_info = get_team_data(team_name)
+    team_info["messages"].append(message)
+    g.redis.set(team_name, json.dumps(team_info))
 
 
-def add_message(room_name, message):
-    room_info = get_room_info(room_name)
-    room_info["messages"].append(message)
-    g.redis.set(room_name, json.dumps(room_info))
+def create_team(team_data):
+    team_name = team_data['room']
+    team_data['members'] = [{"username": team_data['username'], "role": "owner"}]
+    team_data['messages'] = []
+    g.redis.set(team_name, json.dumps(team_data))
+
+
+def user_exists_team(team_data, username):
+    for member in team_data['members']:
+        if member["username"] == username:
+            return True
+    return False
+
+
+def join_team(team_data, username):
+    team_name = team_data['room']
+    if user_exists_team(team_data, username) is False:
+        team_user = {"username": username, "role": "user"}
+        team_data['members'].append(team_user)
+        g.redis.set(team_name, json.dumps(team_data))
+
 

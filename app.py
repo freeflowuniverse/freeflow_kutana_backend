@@ -3,7 +3,7 @@ from flask_socketio import SocketIO, send, join_room, leave_room, emit
 from flask_cors import CORS
 
 from database import connect_redis
-from api import api, add_message, get_room_info
+from api import api, add_message, get_team_data, create_team, join_team
 
 import logging
 import os
@@ -17,11 +17,6 @@ app.config['SECRET_KEY'] = 'totallySecret'
 
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
-
-
-@app.route('/')
-def index():
-    return render_template('socket.html')
 
 
 @app.before_request
@@ -49,13 +44,15 @@ def handle_message(data):
 @socketio.on('join')
 def join_chat(data):
     connect_redis()
-    room = get_room_info(data['room'])
-    if room is None:
-        send(data['room'] + ' room does not exists.')
-        return
+    team_name = data['room']
+    team = get_team_data(team_name)
     username = data['username']
-    join_room(room)
-    send(username + ' has entered the room.', room=room['name'])
+    if team is None:
+        create_team(data)
+    else:
+        join_team(team, username)
+    join_room(team_name)
+    send(username + ' has entered the room.', room=team_name)
 
 
 @socketio.on('leave')
