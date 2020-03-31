@@ -1,11 +1,16 @@
 version: '3.3'
 services:
+
   web:
     build: .
+    container_name: ffc_backend_web
+    restart: always
     ports:
       - "5000:5000"
+    networks:
+      - ffc_backend
   redis:
-    image: "3bot_app_jimber/freeflowconnect-backend:staging"
+    image: "redis:alpine"
     container_name: ffc_backend
     restart: always
     networks:

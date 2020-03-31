@@ -15,8 +15,8 @@ staging_deploy:
     script:
         - echo "Building and deploying ffc_janus staging."
         - docker rm -f ffc_backend || true
-        - docker build -t 3bot_app_jimber/freeflowconnect-backend:staging .
-        - docker run -d -it --name=ffc_backend --network=ffc_backend 3bot_app_jimber/freeflowconnect-backend:staging
+        - docker-compose build
+        - docker-compose up -d
     
 deploy:
     stage: deploy
