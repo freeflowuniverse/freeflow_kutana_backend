@@ -14,7 +14,7 @@ staging_deploy:
         - testserver
     script:
         - echo "Building and deploying ffc_janus staging."
-        - docker rm -f ffc_backend || true
+        - docker rm -f ffc_backend_web ffc_backend_redis ffc_backend || true
         - docker-compose build
         - docker-compose up -d
     
