@@ -21,10 +21,7 @@ services:
 networks:
   ffc_backend:
     driver: bridge
-    driver_opts:
-      enable_ipv6: "true"
     ipam:
       driver: default
       config:
-      - subnet: 172.23.0.0/16
       - subnet: 2a02:1811:b229:9f03:0:0:0:0/64

@@ -16,6 +16,7 @@ staging_deploy:
         - echo "Building and deploying ffc_janus staging."
         - docker rm -f ffc_backend_web ffc_backend_redis ffc_backend || true
         - docker-compose build
+        - docker network create --driver bridge --ipv6 --subnet 2a02:1811:b229:9f03:0:0:0:0/64 freeflowconnect-backend_ffc_backend --attachable
         - docker-compose up -d
     
 deploy:
