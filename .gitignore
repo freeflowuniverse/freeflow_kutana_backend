@@ -18,6 +18,9 @@ docs/_build/
 .vscode
 venv
 
+# config
+/config/freeflow_config.py
+
 
 # Coverage reports
 htmlcov/
