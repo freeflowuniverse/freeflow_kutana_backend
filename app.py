@@ -40,11 +40,16 @@ def handle_message(data):
     emit('message', data, room=data['channel'])
     add_message(data['channel'], data)
 
+@socketio.on('signal')
+def handle_signal(data):
+    connect_redis()
+    emit('signal', data)
+
 
 @socketio.on('join')
 def join_chat(data):
     connect_redis()
-    team_name = data['room']
+    team_name = data['channel']
     team = get_team_data(team_name)
     username = data['username']
     if team is None:
@@ -58,7 +63,7 @@ def join_chat(data):
 @socketio.on('leave')
 def leave_chat(data):
     username = data['username']
-    room = data['room']
+    room = data['channel']
     leave_room(room)
     send(username + ' has left the room.', room=room)
 
