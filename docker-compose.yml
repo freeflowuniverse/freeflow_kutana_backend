@@ -5,6 +5,8 @@ services:
     build: .
     container_name: ffc_backend_web
     restart: always
+    volumes:
+      - /opt/freeflow/config/freeflow_config.py:/config/freeflow_config.py
     ports:
       - "5000:5000"
     networks:
