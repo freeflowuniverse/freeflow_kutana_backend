@@ -2,11 +2,12 @@ version: '3.3'
 services:
 
   web:
-    build: .
+    build: 
+      context: ./
     container_name: ffc_backend_web
     restart: always
     volumes:
-      - /opt/freeflow/config/freeflow_config.py:/config/freeflow_config.py
+      - /opt/freeflow/config/freeflow_config.py:/code/config/freeflow_config.py
     ports:
       - "5000:5000"
     networks:
