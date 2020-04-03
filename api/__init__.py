@@ -17,6 +17,11 @@ api_blueprint = Blueprint('api', __name__, url_prefix='/api')
 def before_request():
     connect_redis()
 
+@api_blueprint.before_request
+def after_request(response):
+    header = response.headers
+    header['Access-Control-Allow-Origin'] = '*'
+    return response
 
 @api_blueprint.route('/teams/<team_name>/', methods=['GET'])
 def get_room_info(team_name):
