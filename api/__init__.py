@@ -94,8 +94,8 @@ def add_message(team_name, message):
 
 
 def create_team(team_data):
-    team_name = team_data['room']
-    team_data['members'] = [{"name": team_data['name'], "role": "owner"}]
+    team_name = team_data['channel']
+    team_data['members'] = [{"username": team_data['username'], "role": "owner"}]
     team_data['messages'] = []
     team_data['invites'] = []
     save_team_info(team_name, team_data)
@@ -109,7 +109,7 @@ def user_exists_team(team_data, username):
 
 
 def join_team(team_data, username):
-    team_name = team_data['room']
+    team_name = team_data['channel']
     if user_exists_team(team_data, username) is False:
         team_user = {"name": username, "role": "user"}
         team_data['members'].append(team_user)
