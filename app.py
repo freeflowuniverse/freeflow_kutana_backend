@@ -58,9 +58,9 @@ def join_chat(data):
     team_name = data['channel']
     team = get_team_data(team_name)
     username = data['username']
-    if is_3bot_user(data) is False:
-        emit('error', {'error': 'Failed to verify {}'.format(username)})
-        return
+    # if is_3bot_user(data) is False:
+    #     emit('error', {'error': 'Failed to verify {}'.format(username)})
+    #     return
     if team is None:
         create_team(data)
     else:
