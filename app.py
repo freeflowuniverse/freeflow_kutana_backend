@@ -47,7 +47,7 @@ def handle_signal(data):
 @socketio.on('join')
 def join_chat(data):
     connect_redis()
-    team_name = data['room']
+    team_name = data['channel']
     team = get_team_data(team_name)
     username = data['name']
     if is_3bot_user(data) is False:
