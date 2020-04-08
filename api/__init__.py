@@ -121,14 +121,14 @@ def save_team_info(team_name, team_info):
 
 
 def is_3bot_user(body_data):
-    auth_response = urlopen("https://{}/api/users/{}".format(THREE_BOT_CONNECT_URL, body_data['username']))
+    auth_response = urlopen("https://{}/api/users/{}".format(THREE_BOT_CONNECT_URL, body_data['doubleName']))
     data = json.loads(auth_response.read())
     user_public = data['publicKey']
 
     verify_key = nacl.signing.VerifyKey(user_public, encoder=nacl.encoding.Base64Encoder)
 
     try:
-        verify_key.verify(base64.b64decode(body_data['signedHash']))
+        verify_key.verify(base64.b64decode(body_data['signedAttempt']))
     except:
         return False
     return True
