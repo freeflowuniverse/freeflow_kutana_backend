@@ -6,6 +6,7 @@ from database import connect_redis
 from api import api, add_message, get_team_data, create_team, join_team
 
 import logging
+import json
 import os
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
@@ -43,7 +44,14 @@ def handle_message(data):
 @socketio.on('signal')
 def handle_signal(data):
     connect_redis()
-    emit('signal', data)
+    print('Signal')
+    if (data['type'] == 'access_requested'):
+        # TODO: check if token is valid
+        print('--------')
+        emit('signal', {'type': 'access_granted'}, room=data['channel'])
+    else:
+        print('--------')
+        emit('signal', data, room=data['channel'])
 
 
 @socketio.on('join')
@@ -57,7 +65,7 @@ def join_chat(data):
     else:
         join_team(team, username)
     join_room(team_name)
-    send(username + ' has entered the room.', room=team_name)
+    send({'content': username + ' has entered the room.'}, room=team_name)
 
 
 @socketio.on('leave')
