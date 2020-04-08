@@ -121,7 +121,7 @@ def save_team_info(team_name, team_info):
 
 
 def is_3bot_user(body_data):
-    auth_response = urlopen("https://{}/api/users/{}".format(THREE_BOT_CONNECT_URL, body_data['name']))
+    auth_response = urlopen("https://{}/api/users/{}".format(THREE_BOT_CONNECT_URL, body_data['username']))
     data = json.loads(auth_response.read())
     user_public = data['publicKey']
 

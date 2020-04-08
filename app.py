@@ -71,7 +71,7 @@ def join_chat(data):
 
 @socketio.on('leave')
 def leave_chat(data):
-    username = data['name']
+    username = data['username']
     room = data['channel']
     leave_room(room)
     send(username + ' has left the room.', room=room)
