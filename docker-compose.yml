@@ -8,13 +8,20 @@ services:
     ports:
       - "5000:5000"
     networks:
-      - ffc_backend
+      ffc_backend:
+        ipv6_address: 2a02:1811:b229:9f03:0:0:0:2
   redis:
     image: "redis:alpine"
-    container_name: ffc_backend
+    container_name: ffc_backend_redis
     restart: always
     networks:
-      - ffc_backend
+      ffc_backend:
+        ipv6_address: 2a02:1811:b229:9f03:0:0:0:3
 
 networks:
   ffc_backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 2a02:1811:b229:9f03:0:0:0:0/64

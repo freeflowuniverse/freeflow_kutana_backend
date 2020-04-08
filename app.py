@@ -1,9 +1,10 @@
-from flask import Flask, render_template, g
+from flask import Flask
 from flask_socketio import SocketIO, send, join_room, leave_room, emit
 from flask_cors import CORS
 
 from database import connect_redis
-from api import api, add_message, get_team_data, create_team, join_team
+from config.freeflow_config import SOCKET_SECRET
+from api import api_blueprint, add_message, get_team_data, create_team, join_team, is_3bot_user
 
 import logging
 import json
@@ -12,17 +13,12 @@ import os
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 
 app = Flask(__name__)
-app.register_blueprint(api)
+app.register_blueprint(api_blueprint)
 
-app.config['SECRET_KEY'] = 'totallySecret'
+app.config['SECRET_KEY'] = SOCKET_SECRET
 
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
-
-
-@app.before_request
-def before_request():
-    connect_redis()
 
 
 @socketio.on('connect')
@@ -41,6 +37,7 @@ def handle_message(data):
     emit('message', data, room=data['channel'])
     add_message(data['channel'], data)
 
+
 @socketio.on('signal')
 def handle_signal(data):
     connect_redis()
@@ -57,10 +54,10 @@ def handle_signal(data):
 @socketio.on('join')
 def join_chat(data):
     connect_redis()
-    team_name = data['channel']
+    team_name = data['room']
     team = get_team_data(team_name)
-    username = data['username']
-    if team is None:
+    username = data['name']
+    if is_3bot_user(data) and team is None:
         create_team(data)
     else:
         join_team(team, username)
@@ -70,7 +67,7 @@ def join_chat(data):
 
 @socketio.on('leave')
 def leave_chat(data):
-    username = data['username']
+    username = data['name']
     room = data['channel']
     leave_room(room)
     send(username + ' has left the room.', room=room)
