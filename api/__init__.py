@@ -87,13 +87,8 @@ def add_message(team_name, message):
 
 
 def create_team(team_data):
-<<<<<<< HEAD
     team_name = team_data['channel']
     team_data['members'] = [{"username": team_data['username'], "role": "owner"}]
-=======
-    team_name = team_data['room']
-    team_data['members'] = [{"name": team_data['name'], "role": "owner"}]
->>>>>>> 25d74832f45da4653b5b64bf914b68283aecdd71
     team_data['messages'] = []
     team_data['invites'] = []
     save_team_info(team_name, team_data)
