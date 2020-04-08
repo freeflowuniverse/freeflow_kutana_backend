@@ -46,7 +46,7 @@ def handle_signal(data):
     if (data['type'] == 'access_requested'):
         # TODO: check if token is valid
         print('--------')
-        send('signal', {'type': 'access_granted'})
+        emit('signal', {'type': 'access_granted'})
     else:
         print('--------')
         emit('signal', data, room=data['channel'])
