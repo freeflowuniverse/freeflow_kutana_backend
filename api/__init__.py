@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, g, request
 from database import connect_redis
 from config.freeflow_config import THREE_BOT_CONNECT_URL
+from flask_cors import CORS
 
 import nacl
 import nacl.signing
@@ -12,11 +13,17 @@ import json
 
 api_blueprint = Blueprint('api', __name__, url_prefix='/api')
 
+CORS(api_blueprint)
 
 @api_blueprint.before_request
 def before_request():
     connect_redis()
 
+""" @api_blueprint.before_request
+def after_request(response):
+    header = response.headers
+    header['Access-Control-Allow-Origin'] = '*'
+    return response """
 
 @api_blueprint.route('/teams/<team_name>/', methods=['GET'])
 def get_room_info(team_name):

@@ -18,6 +18,7 @@ app.register_blueprint(api_blueprint)
 app.config['SECRET_KEY'] = SOCKET_SECRET
 
 CORS(app)
+app.config["CORS_HEADERS"] = "Content-Type"
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 
@@ -57,7 +58,10 @@ def join_chat(data):
     team_name = data['room']
     team = get_team_data(team_name)
     username = data['name']
-    if is_3bot_user(data) and team is None:
+    if is_3bot_user(data) is False:
+        emit('error', {'error': 'Failed to verify {}'.format(username)})
+        return
+    if team is None:
         create_team(data)
     else:
         join_team(team, username)
