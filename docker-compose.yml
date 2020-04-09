@@ -7,7 +7,7 @@ services:
     container_name: ffc_backend_web
     restart: always
     volumes:
-      - /opt/freeflow/config/freeflow_config.py:/code/config/freeflow_config.py
+      - /opt/freeflow/config/freeflow_config.py:/usr/share/nginx/config/freeflow_config.py
     ports:
       - "5000:5000"
     networks:
