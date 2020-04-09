@@ -111,7 +111,7 @@ def user_exists_team(team_data, username):
 def join_team(team_data, username):
     team_name = team_data['channel']
     if user_exists_team(team_data, username) is False:
-        team_user = {"name": username, "role": "user"}
+        team_user = {"username": username, "role": "user"}
         team_data['members'].append(team_user)
         save_team_info(team_name, team_data)
 
