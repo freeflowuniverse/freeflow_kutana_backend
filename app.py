@@ -48,7 +48,7 @@ def handle_signal(data):
     if (data['type'] == 'access_requested'):
         # TODO: check if token is valid
         emit('signal', {'type': 'access_granted'})
-    else if (data['type'] == 'screenshare_started'):
+    elif (data['type'] == 'screenshare_started'):
         roomsSharingScreen[data['channel']] = data
         emit('signal', data, room=data['channel'])
     else:
