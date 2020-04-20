@@ -50,6 +50,9 @@ def handle_signal(data):
         emit('signal', {'type': 'access_granted'})
     elif (data['type'] == 'screenshare_started'):
         roomsSharingScreen[data['channel']] = data
+        emit('signal', data)
+    elif (data['type'] == 'screenshare_stopped'):
+        del roomsSharingScreen[data['channel']]
         emit('signal', data, room=data['channel'])
     else:
         emit('signal', data, room=data['channel'])
