@@ -21,6 +21,8 @@ CORS(app)
 app.config["CORS_HEADERS"] = "Content-Type"
 socketio = SocketIO(app, cors_allowed_origins="*", transports=["websocket"])
 
+roomsSharingScreen = {}
+
 
 @socketio.on('connect')
 def connect_socket():
@@ -45,10 +47,11 @@ def handle_signal(data):
     print('Signal')
     if (data['type'] == 'access_requested'):
         # TODO: check if token is valid
-        print('--------')
         emit('signal', {'type': 'access_granted'})
+    else if (data['type'] == 'screenshare_started'):
+        roomsSharingScreen[data['channel']] = data
+        emit('signal', data, room=data['channel'])
     else:
-        print('--------')
         emit('signal', data, room=data['channel'])
 
 
@@ -63,9 +66,9 @@ def join_chat(data):
     #     return
     if team is None:
         create_team(data)
-    else:
-        join_team(team, username)
-    join_room(team_name)
+    join_team(team, username)
+    if roomsSharingScreen[team_name] is not None:
+        emit('signal', roomsSharingScreen[team_name], room=team_name)
     send({'content': username + ' has entered the room.'}, room=team_name)
 
 
