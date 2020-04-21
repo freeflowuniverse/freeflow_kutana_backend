@@ -50,7 +50,7 @@ def handle_signal(data):
         emit('signal', {'type': 'access_granted'})
     elif (data['type'] == 'screenshare_started'):
         roomsSharingScreen[data['channel']] = data
-        emit('signal', data)
+        emit('signal', data, room=data['channel'])
     elif (data['type'] == 'screenshare_stopped'):
         del roomsSharingScreen[data['channel']]
         emit('signal', data, room=data['channel'])
@@ -83,8 +83,9 @@ def join_chat(data):
 def leave_chat(data):
     username = data['username']
     room = data['channel']
-    leave_room(room)
-    send(username + ' has left the room.', room=room)
+    content = {'content': username + ' has left the room.'}
+    add_message(team_name, content)
+    emit(content, room=team_name)
 
 
 if __name__ == '__main__':
