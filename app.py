@@ -73,8 +73,10 @@ def join_chat(data):
         join_team(team, username)
     join_room(team_name)
     if roomsSharingScreen[team_name] is not None:
-        emit('signal', roomsSharingScreen[team_name], room=team_name)
-    send({'content': username + ' has entered the room.'}, room=team_name)
+        emit('signal', roomsSharingScreen[team_name])
+    content = {'content': username + ' has entered the room.'}
+    add_message(team_name, content)
+    emit(content, room=team_name)
 
 
 @socketio.on('leave')
