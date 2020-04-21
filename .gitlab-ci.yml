@@ -1,48 +1,61 @@
-#caching modules
 cache:
     paths:
       - node_modules/
       - .yarn
+
 stages:
+    - build
     - deploy
 
-testing_deploy:
-    stage: deploy
+staging_build:
+    stage: build
     only:
-        - /^v(\d+\.)?(\d+\.)?(\*|\d+)-test\d*$/
+        - /^v(\d+\.)?(\d+\.)?(\*|\d+)-rc\d*$/
     tags:
-        - testserver
+        - ffcbuilder
     script:
-        - echo "Building and deploying ffc_janus staging."
-        - docker rm -f ffc_backend_web ffc_backend_redis ffc_backend || true
-        - docker-compose build
-        - docker network rm freeflowconnect-backend_ffc_backend
-        - docker network create --driver bridge --ipv6 --subnet 2a02:1811:b229:9f03:0:0:0:0/64 freeflowconnect-backend_ffc_backend --attachable
-        - docker-compose up -d
+        - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
+        - echo "Building ffc_backend_api staging."
+        - docker build -t jimber/ffc_backend_api:staging-$CI_COMMIT_TAG .
+        - docker push jimber/ffc_backend_api:staging-$CI_COMMIT_TAG
 
 staging_deploy:
     stage: deploy
     only:
         - /^v(\d+\.)?(\d+\.)?(\*|\d+)-rc\d*$/
     tags:
-        - testserver
+        - ffcstaging
     script:
-        - echo "Building and deploying ffc_janus staging."
-        - docker rm -f ffc_backend_web ffc_backend_redis ffc_backend || true
-        - docker-compose build
-        - docker network rm freeflowconnect-backend_ffc_backend
-        - docker network create --driver bridge --ipv6 --subnet 2a02:1811:b229:9f03:0:0:0:0/64 freeflowconnect-backend_ffc_backend --attachable
-        - docker-compose up -d
-    
-deploy:
+        - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
+        - echo "Deploying ffc_backend_api staging."
+        - docker pull jimber/ffc_backend_api:staging-$CI_COMMIT_TAG
+        - docker rm -f ffc_backend_api || true
+        - docker run -dit --name=ffc_backend_api --network=ffc_network jimber/ffc_backend_api:staging-$CI_COMMIT_TAG
+        - docker run -dit --name=ffc_backend_redis --network=ffc_network redis:alpine
+
+production_build:
+    stage: build
+    only:
+        - /^(\d+\.)?(\d+\.)?(\*|\d+)$/
+    tags:
+        - ffcbuilder
+    script:
+        - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
+        - echo "Building ffc_backend_api production."
+        - docker build -t jimber/ffc_backend_api:production-$CI_COMMIT_TAG .
+        - docker push jimber/ffc_backend_api:production-$CI_COMMIT_TAG
+
+production_deploy:
     stage: deploy
     only:
         - /^(\d+\.)?(\d+\.)?(\*|\d+)$/
     tags:
-        - testserver
+        - ffcproduction
     script:
-        - echo "Building and deploying ffc_janus production."
-        - docker rm -f ffc_janus || true
-        - docker build -t 3bot_app_jimber/freeflowconnect-backend:$CI_COMMIT_TAG .
-        - docker run -d -it --name=ffc_backend --network=ffc_backend 3bot_app_jimber/freeflowconnect-backend:$CI_COMMIT_TAG
+        - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
+        - echo "Deploying ffc_backend_api production."
+        - docker pull jimber/ffc_backend_api:production-$CI_COMMIT_TAG
+        - docker rm -f ffc_backend_api || true
+        - docker run -dit --name=ffc_backend_api --network=ffc_network jimber/ffc_backend_api:production-$CI_COMMIT_TAG
+        - docker run -dit --name=ffc_backend_redis --network=ffc_network redis:alpine
     
