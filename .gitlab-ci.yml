@@ -28,9 +28,9 @@ staging_deploy:
     script:
         - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
         - echo "Deploying ffc_backend_api staging."
-        - docker pull jimber/ffc_backend_api:staging-$CI_COMMIT_TAG
         - docker rm -f ffc_backend_api || true
         - docker rm -f ffc_backend_redis || true
+        - docker pull jimber/ffc_backend_api:staging-$CI_COMMIT_TAG
         - docker run -dit --network=ffc_network --name=ffc_backend_api -p 5000:5000 -v /opt/freeflow/config/freeflow_config.py:/usr/share/nginx/config/freeflow_config.py jimber/ffc_backend_api:staging-$CI_COMMIT_TAG
         - docker run -dit --network=ffc_network --name=ffc_backend_redis redis:alpine
 
@@ -55,8 +55,8 @@ production_deploy:
     script:
         - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
         - echo "Deploying ffc_backend_api production."
-        - docker pull jimber/ffc_backend_api:production-$CI_COMMIT_TAG
         - docker rm -f ffc_backend_api || true
         - docker rm -f ffc_backend_redis || true
+        - docker pull jimber/ffc_backend_api:production-$CI_COMMIT_TAG
         - docker run -dit --network=ffc_network --name=ffc_backend_api -p 5000:5000 -v /opt/freeflow/config/freeflow_config.py:/usr/share/nginx/config/freeflow_config.py jimber/ffc_backend_api:production-$CI_COMMIT_TAG
         - docker run -dit --network=ffc_network --name=ffc_backend_redis redis:alpine
