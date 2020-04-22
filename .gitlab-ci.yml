@@ -1,8 +1,7 @@
-cache:
-    paths:
-      - node_modules/
-      - .yarn
-
+# cache:
+#     paths:
+#       - node_modules/
+#       - .yarn
 stages:
     - build
     - deploy
