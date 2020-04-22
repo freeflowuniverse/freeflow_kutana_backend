@@ -36,7 +36,7 @@ staging_deploy:
 production_build:
     stage: build
     only:
-        - /^(\d+\.)?(\d+\.)?(\*|\d+)$/
+        - /^v(\d+\.)?(\d+\.)?(\*|\d+)$/
     tags:
         - ffcbuilder
     script:
@@ -48,7 +48,7 @@ production_build:
 production_deploy:
     stage: deploy
     only:
-        - /^(\d+\.)?(\d+\.)?(\*|\d+)$/
+        - /^v(\d+\.)?(\d+\.)?(\*|\d+)$/
     tags:
         - ffcproduction
     script:
