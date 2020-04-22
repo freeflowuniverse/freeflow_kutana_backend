@@ -4,7 +4,7 @@ COPY requirements.txt requirements.txt
 RUN apt update && apt install -y python3 python3-pip gcc libssl-dev python-gevent
 RUN CFLAGS="-I/usr/local/opt/openssl/include" LDFLAGS="-L/usr/local/opt/openssl/lib" UWSGI_PROFILE_OVERRIDE=ssl=true pip3 install uwsgi -Iv
 RUN pip3 install -r requirements.txt
-RUN pip3 install gevent
+RUN pip3 install gevent==1.4.0
 
 COPY . /usr/share/nginx/
 COPY nginx.conf /etc/nginx/conf.d/default.conf
