@@ -47,6 +47,7 @@ production_build:
 
 production_deploy:
     stage: deploy
+    when: manual
     only:
         - /^v(\d+\.)?(\d+\.)?(\*|\d+)$/
     tags:
