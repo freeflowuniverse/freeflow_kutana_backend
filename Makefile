@@ -1,11 +1,11 @@
 install:
+	cp ./config/freeflow_config_example.py ./config/freeflow_config.py
 	sudo apt update && sudo apt install -y python3 python3-pip gcc libssl-dev python-gevent
 	CFLAGS="-I/usr/local/opt/openssl/include" LDFLAGS="-L/usr/local/opt/openssl/lib" UWSGI_PROFILE_OVERRIDE=ssl=true sudo pip3 install uwsgi -Iv
 	sudo pip3 install -r requirements.txt
 	sudo pip3 install gevent==1.4.0
 
 flask-run:
-	cp ./config/freeflow_config_example.py ./config/freeflow_config.py
 	export FLASK_DEBUG=1 && python3 app.py
 
 server-run:
