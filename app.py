@@ -19,7 +19,7 @@ app.config['SECRET_KEY'] = "SOCKET_SECRET"
 
 CORS(app)
 app.config["CORS_HEADERS"] = "Content-Type"
-socketio = SocketIO(app, cors_allowed_origins="*", transports=["websocket"])
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 roomsSharingScreen = {}
 

@@ -14,6 +14,8 @@ services:
   ffc_backend_redis:
     image: "redis:alpine"
     container_name: "ffc_backend_redis"
+    ports:
+      - "6379:6379"
     networks:
       - ffc_network
     restart: always
