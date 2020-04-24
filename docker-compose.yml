@@ -19,6 +19,16 @@ services:
     networks:
       - ffc_network
     restart: always
+  
+  ffc_backend_redis:
+    image: "redis:alpine"
+    container_name: "ffc_backend_redis"
+    command: ["redis-server", "--appendonly", "yes"]
+    networks:
+      - ffc_network
+    volumes:
+      - /opt/freeflow/redis_data:/data
+    restart: always
 networks:
   ffc_network:
     external: true
