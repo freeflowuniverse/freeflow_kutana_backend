@@ -12,7 +12,7 @@ stages:
 build:build:
     stage: build
     only:
-        - ^v(\d+\.)?(\d+\.)?(\*|\d+)
+        - (^v(\d+\.)?(\d+\.)?(\*|\d+)$)|(^v(\d+\.)?(\d+\.)?(\*|\d+)-rc\d*$)|(^v(\d+\.)?(\d+\.)?(\*|\d+)-test\d*$)
     tags:
         - ffcbuilder
     script:
