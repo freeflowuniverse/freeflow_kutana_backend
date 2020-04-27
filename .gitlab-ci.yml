@@ -11,8 +11,6 @@ stages:
 
 build:build:
     stage: build
-    only:
-        - /^v(\d+\.)?(\d+\.)?(\*|\d+)$/
     tags:
         - ffcbuilder
     script:
@@ -20,10 +18,22 @@ build:build:
         - docker-compose build
         - docker-compose push
 
+deploy:testing:
+    stage: deploy
+    only:
+        - /^v(\d+\.)?(\d+\.)?(\*|\d+)-test\d*$/
+    when: manual
+    tags:
+        - ffcstaging
+    script:
+        - *deploy
+    dependencies:
+        - build:build
+
 deploy:staging:
     stage: deploy
     only:
-        - /^v(\d+\.)?(\d+\.)?(\*|\d+)$/
+        - /^v(\d+\.)?(\d+\.)?(\*|\d+)-rc\d*$/
     when: manual
     tags:
         - ffcstaging
