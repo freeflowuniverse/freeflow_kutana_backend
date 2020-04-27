@@ -1,8 +1,5 @@
-.login: &login
-    - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
-
 .deploy: &deploy
-    - *login
+    - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
     - docker rm -f ffc_backend_api || true
     - docker rm -f ffc_backend_redis || true
     - docker-compose pull
@@ -12,27 +9,31 @@ stages:
     - build
     - deploy
 
-build:
+build:build:
     stage: build
     tags:
         - ffcbuilder
     script:
-        - *login
+        - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
         - docker-compose build
         - docker-compose push
 
-staging_deploy:
+deploy:staging:
     stage: deploy
     when: manual
     tags:
         - ffcstaging
     script:
         - *deploy
+    dependencies:
+        - build:build
 
-production_deploy:
+deploy:production:
     stage: deploy
     when: manual
     tags:
         - ffcproduction
     script:
         - *deploy
+    dependencies:
+        - build:build
