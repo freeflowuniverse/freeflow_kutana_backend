@@ -11,6 +11,8 @@ stages:
 
 build:build:
     stage: build
+    only:
+        - ^v(\d+\.)?(\d+\.)?(\*|\d+)
     tags:
         - ffcbuilder
     script:
@@ -46,6 +48,7 @@ deploy:production:
     stage: deploy
     only:
         - /^v(\d+\.)?(\d+\.)?(\*|\d+)$/
+        -   v 1.2.
     when: manual
     tags:
         - ffcproduction
