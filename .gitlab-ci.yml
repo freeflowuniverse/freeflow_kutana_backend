@@ -52,5 +52,4 @@ deploy:production:
     script:
         - *deploy
     dependencies:
-        - build:build
         - deploy:staging
