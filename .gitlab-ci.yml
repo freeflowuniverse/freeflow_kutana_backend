@@ -53,3 +53,4 @@ deploy:production:
         - *deploy
     dependencies:
         - build:build
+        - deploy:staging
