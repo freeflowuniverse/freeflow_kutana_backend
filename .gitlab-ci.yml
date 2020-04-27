@@ -2,7 +2,6 @@
     - eval "[ -z "$CI_COMMIT_TAG" ] && export DOCKER_IMAGE_TAG=$CI_COMMIT_SHORT_SHA || export DOCKER_IMAGE_TAG=$CI_COMMIT_TAG"
 
 .deploy: &deploy
-    - *set_docker_image_tag
     - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
     - docker rm -f ffc_backend_api || true
     - docker rm -f ffc_backend_redis || true
@@ -17,8 +16,9 @@ build:build:
     stage: build
     tags:
         - ffcbuilder
-    script:
+    before_script:
         - *set_docker_image_tag
+    script:
         - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
         - echo ${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA}
         - docker-compose build
@@ -29,6 +29,8 @@ deploy:testing:
     when: manual
     tags:
         - ffcstaging
+    before_script:
+        - *set_docker_image_tag
     script:
         - *deploy
     dependencies:
@@ -39,6 +41,8 @@ deploy:staging:
     when: manual
     tags:
         - ffcstaging
+    before_script:
+        - *set_docker_image_tag
     script:
         - *deploy
     dependencies:
@@ -51,6 +55,8 @@ deploy:production:
         - /^v(\d+\.)?(\d+\.)?(\*|\d+)$/
     tags:
         - ffcproduction
+    before_script:
+        - *set_docker_image_tag
     script:
         - *deploy
     dependencies:
