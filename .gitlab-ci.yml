@@ -1,68 +1,38 @@
-# cache:
-#     paths:
-#       - node_modules/
-#       - .yarn
+.login: &login
+    - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
+
+.deploy: &deploy
+    - *login
+    - docker rm -f ffc_backend_api || true
+    - docker rm -f ffc_backend_redis || true
+    - docker-compose pull
+    - docker-compose up -d
+
 stages:
     - build
     - deploy
 
-staging_build:
-    variables:
-        ENVIRONMENT: staging
+build:
     stage: build
-    only:
-        - /^v(\d+\.)?(\d+\.)?(\*|\d+)-rc\d*$/
     tags:
         - ffcbuilder
     script:
-        - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
-        - echo "Building ffc_backend_api staging."
+        - *login
         - docker-compose build
         - docker-compose push
 
 staging_deploy:
-    variables:
-        ENVIRONMENT: staging
     stage: deploy
-    only:
-        - /^v(\d+\.)?(\d+\.)?(\*|\d+)-rc\d*$/
+    when: manual
     tags:
         - ffcstaging
     script:
-        - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
-        - echo "Deploying ffc_backend_api staging."
-        - docker rm -f ffc_backend_api || true
-        - docker rm -f ffc_backend_redis || true
-        - docker-compose pull
-        - docker-compose up -d
-
-production_build:
-    variables:
-        ENVIRONMENT: production
-    stage: build
-    only:
-        - /^v(\d+\.)?(\d+\.)?(\*|\d+)$/
-    tags:
-        - ffcbuilder
-    script:
-        - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
-        - echo "Building ffc_backend_api production."
-        - docker-compose build
-        - docker-compose push
+        - *deploy
 
 production_deploy:
-    variables:
-        ENVIRONMENT: production
     stage: deploy
     when: manual
-    only:
-        - /^v(\d+\.)?(\d+\.)?(\*|\d+)$/
     tags:
         - ffcproduction
     script:
-        - echo "$DOCKER_PW" | docker login -u $DOCKER_USER --password-stdin
-        - echo "Deploying ffc_backend_api production."
-        - docker rm -f ffc_backend_api || true
-        - docker rm -f ffc_backend_redis || true
-        - docker-compose pull
-        - docker-compose up -d
+        - *deploy

@@ -1,21 +1,14 @@
 version: "3.3"
+
 services:
   ffc_backend_api:
     build: .
-    image: "jimber/ffc_backend_api-${ENVIRONMENT}:${CI_COMMIT_TAG}"
+    image: "jimber/ffc_backend_api:${CI_COMMIT_TAG}"
     container_name: "ffc_backend_api"
     volumes:
       - /opt/freeflow/config/freeflow_config.py:/usr/share/nginx/config/freeflow_config.py
     ports:
       - "5000:5000"
-    networks:
-      - ffc_network
-    restart: always
-  ffc_backend_redis:
-    image: "redis:alpine"
-    container_name: "ffc_backend_redis"
-    ports:
-      - "6379:6379"
     networks:
       - ffc_network
     restart: always
@@ -29,6 +22,7 @@ services:
     volumes:
       - /opt/freeflow/redis_data:/data
     restart: always
+
 networks:
   ffc_network:
     external: true
