@@ -3,7 +3,7 @@ version: "3.3"
 services:
   ffc_backend_api:
     build: .
-    image: "jimber/ffc_backend_api-${CI_COMMIT_TAG}:${CI_COMMIT_SHORT_SHA}"
+    image: "jimber/ffc_backend_api-${CI_COMMIT_REF_NAME}:${CI_COMMIT_SHORT_SHA}"
     container_name: "ffc_backend_api"
     volumes:
       - /opt/freeflow/config/freeflow_config.py:/usr/share/nginx/config/freeflow_config.py
