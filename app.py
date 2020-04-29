@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, Response, request, json, redirect
 from flask_socketio import SocketIO, send, join_room, leave_room, emit
 from flask_cors import CORS
 
@@ -10,7 +10,7 @@ import logging
 import json
 import os
 
-logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
+logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
 
 app = Flask(__name__)
 app.register_blueprint(api_blueprint)
@@ -23,16 +23,34 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 roomsSharingScreen = {}
 
-
 @socketio.on('connect')
 def connect_socket():
     print("Client connected")
 
-
 @socketio.on('disconnect')
 def disconnect_socket():
     print('Client disconnected')
+    
+    referrer = request.referrer
 
+    # Yeah, yeah I know, bite me.
+    if referrer[-1] == "/":
+        referrer = referrer[:-1]
+
+    # Figure out a better way to pass this data then the referrer.
+    channel = referrer.split("/").pop()
+    socket_id = request.sid
+
+    if channel in roomsSharingScreen:
+        if roomsSharingScreen[channel]["socket_id"] == socket_id:
+            print("User that was sharing has disconnected, stopping the share ... ")
+            tmp = roomsSharingScreen[channel]
+            del roomsSharingScreen[channel]
+            tmp["type"] = "screenshare_stopped"
+            print(tmp)
+            emit('signal', tmp, room=channel)
+            roomsSharingScreen[channel] = {}
+            
 
 @socketio.on('message')
 def handle_message(data):
@@ -40,15 +58,17 @@ def handle_message(data):
     emit('message', data, room=data['channel'])
     add_message(data['channel'], data)
 
-
 @socketio.on('signal')
 def handle_signal(data):
     connect_redis()
+
     print('Signal')
     if (data['type'] == 'access_requested'):
-        # TODO: check if token is valid
         emit('signal', {'type': 'access_granted'})
     elif (data['type'] == 'screenshare_started'):
+        print("Started screenshare with SID")
+        print(request.sid)
+        data.update({'socket_id': request.sid})
         roomsSharingScreen[data['channel']] = data
         emit('signal', data, room=data['channel'])
     elif (data['type'] == 'screenshare_stopped'):
@@ -57,36 +77,31 @@ def handle_signal(data):
     else:
         emit('signal', data, room=data['channel'])
 
-
 @socketio.on('join')
 def join_chat(data):
     connect_redis()
     team_name = data['channel']
     team = get_team_data(team_name)
     username = data['username']
-    # if is_3bot_user(data) is False:
-    #     emit('error', {'error': 'Failed to verify {}'.format(username)})
-    #     return
     if team is None:
         create_team(data)
     else:
         join_team(team, username)
     join_room(team_name)
-    if roomsSharingScreen[team_name] is not None:
+    if team_name in roomsSharingScreen:
         emit('signal', roomsSharingScreen[team_name])
     content = {'content': username + ' has entered the room.'}
     add_message(team_name, content)
     emit(content, room=team_name)
 
-
 @socketio.on('leave')
 def leave_chat(data):
     username = data['username']
     room = data['channel']
+    team_name = data['channel']
     content = {'content': username + ' has left the room.'}
     add_message(team_name, content)
     emit(content, room=team_name)
-
 
 if __name__ == '__main__':
     socketio.run(app, host="0.0.0.0", port=5000)

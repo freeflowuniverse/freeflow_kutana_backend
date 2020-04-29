@@ -14,5 +14,5 @@ server-run:
 docker-run:
 	docker rm -f ffc_backend_api || true
 	docker rm -f ffc_backend_redis || true
-	export ENVIRONMENT=local && export CI_COMMIT_TAG=v1.0.0 && docker-compose build
-	export ENVIRONMENT=local && export CI_COMMIT_TAG=v1.0.0 && docker-compose up -d
+	export DOCKER_IMAGE_TAG=local && export CI_COMMIT_TAG=v1.0.0 && docker-compose build
+	export DOCKER_IMAGE_TAG=local && export CI_COMMIT_TAG=v1.0.0 && docker-compose up -d
