@@ -1,29 +1,23 @@
+import base64
+import json
+from urllib.request import urlopen
+
+import nacl.encoding
+import nacl.signing
 from flask import Blueprint, jsonify, g, request
-from database import connect_redis
-from config.freeflow_config import THREE_BOT_CONNECT_URL
 from flask_cors import CORS
 
-import nacl
-import nacl.signing
-import nacl.encoding
-from urllib.request import urlopen
-import base64
-
-import json
+from config.freeflow_config import THREE_BOT_CONNECT_URL
+from database import connect_redis
 
 api_blueprint = Blueprint('api', __name__, url_prefix='/api')
-
 CORS(api_blueprint)
+
 
 @api_blueprint.before_request
 def before_request():
     connect_redis()
 
-""" @api_blueprint.before_request
-def after_request(response):
-    header = response.headers
-    header['Access-Control-Allow-Origin'] = '*'
-    return response """
 
 @api_blueprint.route('/teams/<team_name>/', methods=['GET'])
 def get_room_info(team_name):
@@ -131,4 +125,5 @@ def is_3bot_user(body_data):
         verify_key.verify(base64.b64decode(body_data['signedAttempt']))
     except:
         return False
+
     return True
