@@ -81,6 +81,8 @@ def handle_signal(data):
 def join_chat(data):
     connect_redis()
     team_name = data['channel'].lower()
+    if team_name == 'kimeru':
+        print("@@@@@@@@@@@@@@@@@@@@@@@@@@ NOTIFY SIGNAGE!!")
     team = get_team_data(team_name)
     username = data['username']
     if team is None:
