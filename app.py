@@ -57,8 +57,8 @@ def disconnect_socket():
 @socketio.on('message')
 def handle_message(data):
     connect_redis()
-    emit('message', data, room=data['channel'].lower())
-    add_message(data['channel'].lower(), data)
+    emit('message', data, room=data['channel'])
+    add_message(data['channel'], data)
 
 
 @socketio.on('signal')
@@ -72,20 +72,20 @@ def handle_signal(data):
         print("Started screenshare with SID")
         print(request.sid)
         data.update({'socket_id': request.sid})
-        roomsSharingScreen[data['channel'].lower()] = data
-        emit('signal', data, room=data['channel'].lower())
+        roomsSharingScreen[data['channel']] = data
+        emit('signal', data, room=data['channel'])
 
     if data['type'] == 'screenshare_stopped':
-        del roomsSharingScreen[data['channel'].lower()]
-        emit('signal', data, room=data['channel'].lower())
+        del roomsSharingScreen[data['channel']]
+        emit('signal', data, room=data['channel'])
 
-    emit('signal', data, room=data['channel'].lower())
+    emit('signal', data, room=data['channel'])
 
 
 @socketio.on('join')
 def join_chat(data):
     connect_redis()
-    team_name = data['channel'].lower()
+    team_name = data['channel']
     team = get_team_data(team_name)
     username = data['username']
 
@@ -107,7 +107,7 @@ def join_chat(data):
 @socketio.on('leave')
 def leave_chat(data):
     username = data['username']
-    team_name = data['channel'].lower()
+    team_name = data['channel']
     content = {'content': username + ' has left the room.'}
     add_message(team_name, content)
     emit(content, room=team_name)
