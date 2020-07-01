@@ -3,7 +3,7 @@ version: "3.3"
 services:
   ffc_backend_api:
     build: .
-    image: "jimber/ffc_backend_api:${DOCKER_IMAGE_TAG}"
+    image: "jimber/ffc_backend_api:${DOCKER_IMAGE_TAG:-dev}"
     container_name: "ffc_backend_api"
     volumes:
       - /opt/freeflow/config/freeflow_config.py:/usr/share/nginx/config/freeflow_config.py
@@ -21,6 +21,8 @@ services:
       - ffc_network
     volumes:
       - /opt/freeflow/redis_data:/data
+    ports:
+      - "6379:6379"
     restart: always
 
 networks:
