@@ -74,7 +74,7 @@ def handle_signal(data):
     elif (data['type'] == 'screenshare_stopped'):
         del roomsSharingScreen[data['channel'].lower()]
         emit('signal', data, room=data['channel'].lower())
-    elif (data['type'] == 'presenter_started'):
+    elif (data['type'] == 'presenter_started' or data['type'] == 'presenter_change_settings'):
         data.update({'socket_id': request.sid})
         presenters[data['channel'].lower()] = data
         emit('signal', data, room=data['channel'].lower())
