@@ -100,7 +100,7 @@ def join_chat(data):
     if team_name in roomsSharingScreen:
         emit('signal', roomsSharingScreen[team_name])
     if team_name in presenters:
-        emit('signal', roomsSharingScreen[team_name])
+        emit('signal', presenters[team_name])
     content = {'content': username + ' has entered the room.'}
     add_message(team_name, content)
     emit(content, room=team_name)
