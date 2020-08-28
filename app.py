@@ -7,7 +7,6 @@ from config.freeflow_config import SOCKET_SECRET
 from api import api_blueprint, add_message, get_team_data, create_team, join_team, is_3bot_user
 
 import logging
-import json
 import os
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
@@ -22,6 +21,7 @@ app.config["CORS_HEADERS"] = "Content-Type"
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 roomsSharingScreen = {}
+presenters = {}
 
 @socketio.on('connect')
 def connect_socket():
@@ -74,6 +74,13 @@ def handle_signal(data):
     elif (data['type'] == 'screenshare_stopped'):
         del roomsSharingScreen[data['channel'].lower()]
         emit('signal', data, room=data['channel'].lower())
+    elif (data['type'] == 'presenter_started'):
+        data.update({'socket_id': request.sid})
+        presenters[data['channel'].lower()] = data
+        emit('signal', data, room=data['channel'].lower())
+    elif (data['type'] == 'presenter_ended'):
+        del presenters[data['channel'].lower()]
+        emit('signal', data, room=data['channel'].lower())
     else:
         emit('signal', data, room=data['channel'].lower())
 
@@ -91,6 +98,8 @@ def join_chat(data):
         join_team(team, username)
     join_room(team_name)
     if team_name in roomsSharingScreen:
+        emit('signal', roomsSharingScreen[team_name])
+    if team_name in presenters:
         emit('signal', roomsSharingScreen[team_name])
     content = {'content': username + ' has entered the room.'}
     add_message(team_name, content)
