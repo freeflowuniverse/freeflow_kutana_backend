@@ -15,6 +15,10 @@ api_blueprint = Blueprint('api', __name__, url_prefix='/api')
 
 CORS(api_blueprint)
 
+import threading
+thread_local_storage = threading.local()
+
+
 @api_blueprint.before_request
 def before_request():
     connect_redis()
@@ -77,6 +81,15 @@ def save_invite_url(team_name):
     save_team_info(team_name, team_info)
     return jsonify(invite_object)
 
+@api_blueprint.route('/teams/<team_name>/numberOnline', methods=['GET'])
+def number_online(team_name):
+    if not hasattr(thread_local_storage, 'teamMembersOnline'):
+        print("setting")
+        thread_local_storage.teamMembersOnline = {}
+
+    if team_name in thread_local_storage.teamMembersOnline:
+           return str(thread_local_storage.teamMembersOnline[team_name])
+    return str(0)
 
 def get_team_data(team_name):
     team_info = g.redis.get(team_name)
@@ -114,6 +127,38 @@ def join_team(team_data, username):
         team_user = {"username": username, "role": "user"}
         team_data['members'].append(team_user)
         save_team_info(team_name, team_data)
+
+def go_online(team_name, socket_id, username):
+    if not hasattr(thread_local_storage, 'teamMembersOnline'):
+        thread_local_storage.teamMembersOnline = {}
+    if not hasattr(thread_local_storage, 'socket_id_username'):
+        thread_local_storage.socket_id_username = {}
+    if not hasattr(thread_local_storage, 'socket_id_team'):
+        thread_local_storage.socket_id_team = {}
+
+    thread_local_storage.socket_id_username[socket_id] = username
+    thread_local_storage.socket_id_team[socket_id] = team_name
+    if username == 'kiosk':  # dont count kiosk
+        return
+
+    if team_name in thread_local_storage.teamMembersOnline:
+        thread_local_storage.teamMembersOnline[team_name] = thread_local_storage.teamMembersOnline[team_name] + 1
+    else:
+        thread_local_storage.teamMembersOnline[team_name] = 1
+
+def go_offline(socket_id):
+    if not hasattr(thread_local_storage, 'teamMembersOnline'):
+        thread_local_storage.teamMembersOnline = {}
+
+    if socket_id in thread_local_storage.socket_id_username:
+        if thread_local_storage.socket_id_username[socket_id] == 'kiosk':
+            return
+    else:
+        return
+
+    if socket_id in thread_local_storage.socket_id_team:
+        team_name = thread_local_storage.socket_id_team[socket_id]
+        thread_local_storage.teamMembersOnline[team_name] = thread_local_storage.teamMembersOnline[team_name] - 1
 
 
 def save_team_info(team_name, team_info):

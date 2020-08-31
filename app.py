@@ -4,7 +4,7 @@ from flask_cors import CORS
 
 from database import connect_redis
 from config.freeflow_config import SOCKET_SECRET
-from api import api_blueprint, add_message, get_team_data, create_team, join_team, is_3bot_user
+from api import api_blueprint, add_message, get_team_data, create_team, join_team, is_3bot_user, go_online, go_offline
 
 import logging
 import os
@@ -33,13 +33,15 @@ def disconnect_socket():
     
     referrer = request.referrer
 
+    socket_id = request.sid
+    go_offline(socket_id)
+
     # Yeah, yeah I know, bite me.
     if referrer[-1] == "/":
         referrer = referrer[:-1]
 
     # Figure out a better way to pass this data then the referrer.
     channel = referrer.split("/").pop()
-    socket_id = request.sid
 
     if channel in roomsSharingScreen:
         if roomsSharingScreen[channel]["socket_id"] == socket_id:
@@ -92,6 +94,7 @@ def join_chat(data):
         print("@@@@@@@@@@@@@@@@@@@@@@@@@@ NOTIFY SIGNAGE!!")
     team = get_team_data(team_name)
     username = data['username']
+    go_online(team_name, request.sid, username)
     if team is None:
         create_team(data)
     else:
