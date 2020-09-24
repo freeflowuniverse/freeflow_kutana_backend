@@ -59,7 +59,7 @@ def get_room_chat_history(team_name):
     team_info = get_team_data(team_name)
     if team_info is None:
         return jsonify({'error': 'No team found for {}'.format(team_name)}), 404
-    return jsonify(team_info['messages'])
+    return jsonify(team_info['messages'][-200:])
 
 
 @api_blueprint.route('/teams/<team_name>/invite', methods=['POST'])
