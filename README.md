@@ -18,7 +18,7 @@ make install
 
 Auto generated launch.json file (Press F5 and select Flask)
 
-```
+```json
 {
     "version": "0.2.0",
     "configurations": [

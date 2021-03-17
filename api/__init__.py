@@ -31,10 +31,11 @@ def after_request(response):
 
 @api_blueprint.route('/teams/<team_name>/', methods=['GET'])
 def get_room_info(team_name):
-    team_info = g.redis.get(team_name)
+    team_info = get_team_data(team_name)
     if team_info is None:
         return jsonify({'error': 'No team found for {}'.format(team_name)}), 404
-    return jsonify(json.loads(team_info))
+    team_info['messages'] = team_info['messages'][-200:]
+    return jsonify(team_info)
 
 
 @api_blueprint.route('/teams/<team_name>/members', methods=['GET'])
@@ -63,7 +64,7 @@ def get_room_chat_history(team_name):
     team_info = get_team_data(team_name)
     if team_info is None:
         return jsonify({'error': 'No team found for {}'.format(team_name)}), 404
-    return jsonify(team_info['messages'])
+    return jsonify(team_info['messages'][-200:])
 
 
 @api_blueprint.route('/teams/<team_name>/invite', methods=['POST'])
