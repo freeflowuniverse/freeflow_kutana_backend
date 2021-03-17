@@ -1,3 +1,4 @@
+import threading
 from flask import Blueprint, jsonify, g, request
 from database import connect_redis
 from config.freeflow_config import THREE_BOT_CONNECT_URL
@@ -15,7 +16,6 @@ api_blueprint = Blueprint('api', __name__, url_prefix='/api')
 
 CORS(api_blueprint)
 
-import threading
 thread_local_storage = threading.local()
 
 
@@ -23,11 +23,13 @@ thread_local_storage = threading.local()
 def before_request():
     connect_redis()
 
+
 """ @api_blueprint.before_request
 def after_request(response):
     header = response.headers
     header['Access-Control-Allow-Origin'] = '*'
     return response """
+
 
 @api_blueprint.route('/teams/<team_name>/', methods=['GET'])
 def get_room_info(team_name):
@@ -74,13 +76,16 @@ def save_invite_url(team_name):
     if team_info is None:
         return jsonify({'error': 'No team found for {}'.format(team_name)}), 404
     if 'invites' not in team_info:
-        team_info['invites'] = [{'token': body_data['token'], 'time_active': None, 'times_used': 0}]
+        team_info['invites'] = [
+            {'token': body_data['token'], 'time_active': None, 'times_used': 0}]
         save_team_info(team_name, team_info)
         return jsonify(team_info['invites'])
-    invite_object = {'token': body_data['token'], 'time_active': None, 'times_used': 0}
+    invite_object = {'token': body_data['token'],
+                     'time_active': None, 'times_used': 0}
     team_info['invites'].append(invite_object)
     save_team_info(team_name, team_info)
     return jsonify(invite_object)
+
 
 @api_blueprint.route('/teams/<team_name>/numberOnline', methods=['GET'])
 def number_online(team_name):
@@ -89,8 +94,9 @@ def number_online(team_name):
         thread_local_storage.teamMembersOnline = {}
 
     if team_name in thread_local_storage.teamMembersOnline:
-           return str(thread_local_storage.teamMembersOnline[team_name])
+        return str(thread_local_storage.teamMembersOnline[team_name])
     return str(0)
+
 
 def get_team_data(team_name):
     team_info = g.redis.get(team_name)
@@ -109,7 +115,8 @@ def add_message(team_name, message):
 
 def create_team(team_data):
     team_name = team_data['channel']
-    team_data['members'] = [{"username": team_data['username'], "role": "owner"}]
+    team_data['members'] = [
+        {"username": team_data['username'], "role": "owner"}]
     team_data['messages'] = []
     team_data['invites'] = []
     save_team_info(team_name, team_data)
@@ -129,6 +136,7 @@ def join_team(team_data, username):
         team_data['members'].append(team_user)
         save_team_info(team_name, team_data)
 
+
 def go_online(team_name, socket_id, username):
     if not hasattr(thread_local_storage, 'teamMembersOnline'):
         thread_local_storage.teamMembersOnline = {}
@@ -146,6 +154,7 @@ def go_online(team_name, socket_id, username):
         thread_local_storage.teamMembersOnline[team_name] = thread_local_storage.teamMembersOnline[team_name] + 1
     else:
         thread_local_storage.teamMembersOnline[team_name] = 1
+
 
 def go_offline(socket_id):
     if not hasattr(thread_local_storage, 'teamMembersOnline'):
@@ -167,11 +176,13 @@ def save_team_info(team_name, team_info):
 
 
 def is_3bot_user(body_data):
-    auth_response = urlopen("https://{}/api/users/{}".format(THREE_BOT_CONNECT_URL, body_data['doubleName']))
+    auth_response = urlopen(
+        "https://{}/api/users/{}".format(THREE_BOT_CONNECT_URL, body_data['doubleName']))
     data = json.loads(auth_response.read())
     user_public = data['publicKey']
 
-    verify_key = nacl.signing.VerifyKey(user_public, encoder=nacl.encoding.Base64Encoder)
+    verify_key = nacl.signing.VerifyKey(
+        user_public, encoder=nacl.encoding.Base64Encoder)
 
     try:
         verify_key.verify(base64.b64decode(body_data['signedAttempt']))

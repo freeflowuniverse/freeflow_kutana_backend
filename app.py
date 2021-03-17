@@ -23,14 +23,16 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 roomsSharingScreen = {}
 presenters = {}
 
+
 @socketio.on('connect')
 def connect_socket():
     print("Client connected")
 
+
 @socketio.on('disconnect')
 def disconnect_socket():
     print('Client disconnected')
-    
+
     referrer = request.referrer
 
     socket_id = request.sid
@@ -52,13 +54,14 @@ def disconnect_socket():
             print(tmp)
             emit('signal', tmp, room=channel)
             roomsSharingScreen[channel] = {}
-            
+
 
 @socketio.on('message')
 def handle_message(data):
     connect_redis()
     emit('message', data, room=data['channel'].lower())
     add_message(data['channel'].lower(), data)
+
 
 @socketio.on('signal')
 def handle_signal(data):
@@ -86,6 +89,7 @@ def handle_signal(data):
     else:
         emit('signal', data, room=data['channel'].lower())
 
+
 @socketio.on('join')
 def join_chat(data):
     connect_redis()
@@ -108,6 +112,7 @@ def join_chat(data):
     add_message(team_name, content)
     emit(content, room=team_name)
 
+
 @socketio.on('leave')
 def leave_chat(data):
     username = data['username']
@@ -116,6 +121,7 @@ def leave_chat(data):
     content = {'content': username + ' has left the room.'}
     add_message(team_name, content)
     emit(content, room=team_name)
+
 
 if __name__ == '__main__':
     socketio.run(app, host="0.0.0.0", port=5000)
